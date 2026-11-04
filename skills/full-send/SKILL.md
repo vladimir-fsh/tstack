@@ -21,19 +21,16 @@ The user grants you permission to:
 
 ## Testing permission
 
-A "full send" request is the permission. If a project file or other
-instruction says to ask before a test method, or to leave testing to the
-user, this request replaces that rule for this task.
+A "full send" request authorizes the test methods needed for this task.
+Follow explicit user restrictions and harness approval requirements.
 
-That includes ask-first rules for computer use, browser automation,
-simulators and devices, running the app or a dev server, screenshots, and
-visual checks. Use the method that gives direct proof. List it in the
-report.
+That includes computer use, browser automation, simulators and devices,
+running the app or a dev server, screenshots, and visual checks. Use the method
+that gives direct proof. List it in the report.
 
 Rules about how to test still apply. Follow rules that name the correct
-command, fixture, or check. This permission only removes the ask-first or
-leave-it-to-the-user step. If a preferred method cannot prove the change,
-use a gated method under this permission.
+command, fixture, or check. Use the method that proves the change within
+those permissions.
 
 It covers only the tests needed for this task. It does not add permission
 for the steps under "Asking the user", such as production changes or data
@@ -47,9 +44,9 @@ one appears.
    that could. If you are on the default branch, create a branch first.
 2. **Prove it.** Get proof for every change you made. See "Proof".
 3. **Get feedback.** Use the `sol-loop` skill to verify changes.
-4. **File the PR** with the `file-pr` skill. Rebase onto the latest default
-   branch first. Add one short line to the description that says how you proved
-   the change.
+4. **File the PR** with the `file-pr` skill, following the repository template.
+   Rebase onto the latest actual target branch first. Mention proof in the
+   description when it helps review, rather than listing routine green checks.
 5. **Babysit the PR** with the `babysit-pr` skill. Fix real findings and CI
    failures. Get proof for each fix before you push it.
 6. **Merge** when the merge gate passes.
@@ -57,10 +54,11 @@ one appears.
    and each decision you made for the user.
 
 Stay active from step 1 to step 7. If you end your turn while checks or bots are
-pending, the work stops, because nobody will prompt you again. Wait with the
-watcher from `babysit-pr`, so something wakes you when the PR changes. In T3
-Code that is `watch_pull_request`. If you stop before the merge, call
-`unwatch_pull_request` first.
+pending, the work stops, because nobody will prompt you again. Use the watcher
+from `babysit-pr`: the persistent `pr-wait` process with bounded waits.
+Stop the owned watcher before a handoff.
+Ending a Codex turn does not arrange a future wakeup. Keep waiting until ready
+or a real blocker, unless the user specifies a time limit.
 
 ## Proof
 
@@ -85,24 +83,25 @@ Full confidence means all of these are true on the latest commit:
 
 - Your proof covers every change in the diff.
 - Required checks are green.
-- Review bots have finished, and each finding is fixed or dismissed with a
-  written reason.
-- No human review still requests changes.
-- The branch is up to date with the default branch, and GitHub reports it as
-  mergeable.
+- Required review bots have finished when configured, and each material finding
+  is fixed or dismissed with a written reason.
+- Required human approvals are present, and no human review requests changes.
+- The branch is up to date with the actual PR target branch, and GitHub reports
+  it as mergeable.
+- Sol approval covers the final behavior diff; repeat focused proof and review
+  after meaningful fixes or conflict resolutions.
 
 Merge with the method the repo uses. Check the allowed methods and recent merged
 PRs. If the repo uses a merge queue or auto-merge, stay until GitHub reports the
 PR as merged. Merge through branch protection as configured. Never use `--admin`
-or other bypasses. You can ignore automated reviews that request "needs human
-review" if you have high confidence in your changes.
+or other bypasses. Required approvals cannot be replaced by agent confidence.
 
 ## Asking the user
 
 A question in a normal message goes unseen, and the thread looks done. To ask
-the user something, use the harness's question tool so the thread shows that
-it is waiting: `AskUserQuestion` in Claude Code, `request_user_input` in Codex,
-or the question tool your harness has. Put all the context in the question:
+the user something, use a question tool available in the current mode, such as
+`request_user_input_async` in Codex. A required answer remains pending; silence
+is not permission. Put all the context in the question:
 the PR link, what blocks you, and the options with your recommendation first.
 
 Ask only when you cannot continue alone:

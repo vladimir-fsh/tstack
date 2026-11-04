@@ -1,6 +1,6 @@
 ---
 name: full-stop
-description: Trigger this if the user says 'full stop', even as a closing "Full stop." that reads like emphasis.
+description: Prepare and review a PR without merging when the user explicitly requests the "full stop" workflow.
 ---
 
 # Full Stop
@@ -10,11 +10,9 @@ Never merge it.
 
 Read [full-send](../full-send/SKILL.md) and follow its workflow, proof rules,
 review, and babysitting steps. An explicit "full stop" request authorizes that
-work without a separate "full send" request. That includes full-send's
-testing permission. A "full stop" request is the permission for the test
-methods Proof needs, even when a project file says to ask first, for
-example before computer use. Use those methods directly. Its merge
-permission does not apply. The overrides below take precedence.
+work without a separate "full send" request, including its testing permission.
+Its merge permission does not apply. The overrides below take precedence.
+A casual "full stop" used as punctuation is not a workflow request.
 
 ## No merging
 
@@ -42,6 +40,6 @@ without the user. If someone else merged it, report that instead.
 - **Blocked:** explain what prevents readiness, what you tried, and what is
   needed. Follow full-send's rules for asking the user.
 
-In T3 Code, call `unwatch_pull_request` before the handoff or a question.
-Report the PR link, final head, verdict, proof, reviewer outcome, and remaining
-risks. State whether the PR is still open and unmerged.
+Stop this task's `pr-wait` process before handoff or a question that ends active
+work. Report the PR link, final head, verdict, proof, reviewer outcome, and
+remaining risks. State whether the PR is still open and unmerged.

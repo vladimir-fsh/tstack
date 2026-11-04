@@ -12,6 +12,9 @@ another agent already built it.
 Read the source PR, branch, or thread, including review findings and the user's
 later corrections. Resolve the handoff to the actual code and current head,
 and account for uncommitted work. Treat the handoff as context, not proof.
+For Codex chats use the available `read_thread` tools. If another chat or external
+agent transcript cannot be accessed, continue from the linked PR or branch and
+state the missing context instead of inventing a cross-harness thread tool.
 
 For a replacement PR, import the original commits onto a new branch and add
 your fixes separately. Honor an explicitly requested in-place or stacked
@@ -35,7 +38,9 @@ repository guidance and permissions. Green mocked tests do not prove the user
 experience works. State what remains unverified.
 
 When the requested finish includes a PR, use `file-pr` to file or update it,
-then `babysit-pr` rather than stopping at creation. Use `leaving-pr-comments`
+then `babysit-pr` rather than stopping at creation. Follow the repository's
+required PR skill and template through `file-pr`; use the Codex waiting path
+and report any waiting limit or blocker. Use `leaving-pr-comments`
 for replies. Merge or close the original PR only when authorized.
 
 Report what you inherited, what you changed, how you verified it, how credit

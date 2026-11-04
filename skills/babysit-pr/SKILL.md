@@ -10,32 +10,13 @@ right.
 
 ## Waiting
 
-Never write your own watcher, polling loop, or `sleep` loop. Use one watcher
-per PR: `watch_pull_request` in T3 Code, `pr-wait` everywhere else. Never run
-both on the same PR. Every watcher on a GitHub account shares one rate limit.
+Never write your own watcher, polling loop, or `sleep` loop. Use one `pr-wait`
+watcher per PR. Every watcher on a GitHub account shares one rate limit.
+Only the parent that owns the PR watches it; review delegates do not.
+Handle existing checks and comments before starting the watcher.
+A watcher event is news, not a merge decision; check the merge gate yourself.
 
-### In T3 Code: `watch_pull_request`
-
-Handle the existing checks and comments first. Then call
-`watch_pull_request` and end your turn. T3 Code wakes you with a message when
-a check fails, the required checks pass, someone comments or reviews, or the
-branch conflicts.
-
-- **Only the thread that owns the PR watches it.** If you are a delegated
-  child task (a reviewer, a Sol round, any `delegate_task` child), never call
-  `watch_pull_request`. The parent owns the PR. Do not watch PRs you are not
-  working on.
-- **A wake is news, not a merge decision.** Check the merge gate yourself.
-- **Unwatch when you hand off.** A watched thread stays in Working and out of
-  the user's inbox. When you stop (ready, blocked, or asking the user a question),
-  call `unwatch_pull_request` first. A merge or close ends the watch on its
-  own.
-- **"Stopped watching, could not read it"** usually means GitHub's rate limit
-  is used up. Run `gh api rate_limit --jq .resources.graphql` before you
-  watch again. If `remaining` is near 0, wait for `reset` with one background
-  command, then watch again. Never watch again in a tight loop.
-
-### Everywhere else: `pr-wait`
+### `pr-wait`
 
 Wait with `scripts/pr-wait` from this skill's directory (use its absolute
 path).
@@ -48,11 +29,22 @@ It prints one line per real event. It exits 0 when the `--until` condition is
 met or the PR merges, 1 when it needs you (a required check failed, conflicts,
 unresolved threads, PR closed), and 2 on bad input.
 
-- `ready` (default): required checks green, Greptile or Macroscope reviewed the
-  head, and no unresolved threads. Use this to babysit.
-- `green`: required checks only. Use it when the repo has no Greptile or
-  Macroscope.
+- `ready` (default): checks green, Greptile or Macroscope reviewed the head,
+  and no unresolved threads. Use it when one of those bots is expected.
+- `green`: required checks, or all CI checks when none are marked required.
+  Use it when the repo has no Greptile or Macroscope; assess reviews separately.
 - `any-change`: exit on the first event.
+
+When no checks exist or are expected, assess readiness directly; neither
+`green` nor `ready` completes on an empty check set. Exit 0 alone does not prove
+the full merge gate; read the event to distinguish ready from already merged.
+
+In Codex, run the bundled script with `/usr/bin/python3` and its absolute path.
+Keep the process/session ID and collect output in waits of at most 60 seconds.
+Stay active while waiting; ending a Codex turn does not arrange a future wakeup.
+The parent can do independent work while CI runs. Stop the owned watcher before
+a final handoff or a question that ends active work. Continue until ready or a
+real blocker, unless the user specifies a time limit.
 
 In Claude Code, run it with the Monitor tool (`timeout_ms: 3600000`), so each
 line wakes you. Without a monitor, run it as one long command. It ends on its
@@ -61,10 +53,10 @@ own.
 Start it again after you push, after you handle an exit 1, and after a resume.
 It remembers what it already reported, so nothing that arrived in between is
 lost. If it says another pid already watches the PR, do not start a second one.
-Kill the old one only if its events do not reach you.
+Stop the old one only after confirming it is a stale watcher owned by this task.
 
-With either watcher: when an event needs no action, end your turn without a
-message. Never post or say "still waiting".
+When an event needs no action, keep waiting quietly. Only end the turn when a
+service-side watcher or Monitor will wake it. Never post or say "still waiting".
 
 ## GitHub rate limits
 
@@ -75,8 +67,8 @@ used up, the REST limit is separate and usually still has room. Use
 
 ## Reviews
 
-Only act on checks and comments newer than the latest push. Verify every bot
-finding against the source before changing code. Fix real findings and CI
+Evaluate checks on the latest PR head and reconcile still-open findings,
+including older threads, against the current source. Fix real findings and CI
 failures, distinguish repository failures from infrastructure flakes, and reply
 with a written reason when dismissing false positives.
 
@@ -86,31 +78,31 @@ reply to a Macroscope finding. Its findings cite them.
 CodeRabbit is advisory. Treat its findings like any other finding, but never
 wait for it and never hold a merge for it.
 
-If a review bot leaves feedback you believe is not worth addressing, reply with
-a written reason and resolve the comment. Use the `leaving-pr-comments` skill
+Within authorized PR maintenance, explain dismissed feedback with evidence
+and resolve the thread after the reply succeeds. A read-only monitoring request
+does not authorize fixes or replies. Use the `leaving-pr-comments` skill
 for every comment posted on the user's behalf.
 
 Screenshots and videos help as well, when you have a way to upload them.
 
 Keep the PR at the size the user's goal needs. Review loops tend to grow a
 PR one cheap-looking fix at a time. Fix real bugs in the intended case.
-Decline the rest with a written reason, and list them as follow-ups:
-unneeded tests, guards for edge cases that do not matter, extra integration
-or compatibility, and small performance costs. Prefer the fix that deletes or
-narrows code.
+Decline unrelated suggestions with a reason, and list them as follow-ups:
+unneeded tests, extra integration or compatibility, and small performance costs.
+Judge uncommon security, data-loss, and concurrency failures by impact. Prefer
+the fix that deletes or narrows code.
 
 ## Base branch and merging
 
-Keep an eye on changes to `main` and rebase when needed. `pr-wait` reports when
-new base commits touch this PR's files, and when the PR becomes BEHIND or DIRTY.
-`watch_pull_request` reports conflicts only, so check for BEHIND yourself
-before you call the PR ready.
+Track the PR's actual target branch and rebase when updates are authorized.
+`pr-wait` reports when new base commits touch this PR's files, and when the PR
+becomes BEHIND or DIRTY.
+Check the current head, base, and merge gate before declaring the PR ready.
 If an overlapping PR makes this one obsolete, stop monitoring, report it to the
 user, and ask before closing the PR unless closure was explicitly authorized.
 
 If nothing has changed, stay quiet rather than posting filler comments. Stop
-when `pr-wait` exits 0, or in T3 Code when the merge gate passes on the latest
-head. Merge only when the user explicitly requested it;
+when `pr-wait` exits 0 and the merge gate passes on the latest head. Merge only when the user explicitly requested it;
 otherwise report that the PR is ready. Right before a merge, run `git fetch` and
 check the PR again. Never merge when it is BEHIND or DIRTY, or when base commits
 that landed after the last green run touch this PR's files. Rebase, push, and

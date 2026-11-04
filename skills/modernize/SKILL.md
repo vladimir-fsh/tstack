@@ -12,10 +12,12 @@ PR still belongs in the product.
 
 ## Guardrails
 
-- Always check to make sure you have pulled latest origin for your branch, main
-  branch, and any other branch related to your work before starting.
-- Treat existing worktree changes as user-owned. Use a disposable worktree when
-  the active worktree is dirty or is being used for other work.
+- Fetch the current remote PR head and its actual base branch before judging
+  the change. Fetch does not alter local user work; do not pull unrelated branches.
+- Treat existing worktree changes as user-owned. Reuse a suitable clean
+  checkout; when isolation is necessary, use Codex's available worktree tools
+  in Codex, or a disposable worktree in other environments.
+  Do not stash or discard unrelated changes to make a checkout usable.
 - Modernizing authorizes rebasing and updating the PR branch. It does not
   authorize merging, closing, changing the base branch, or expanding scope.
 - Never use an unqualified force push. Update a rebased branch with
