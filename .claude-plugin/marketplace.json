@@ -1,0 +1,17 @@
+{
+  "name": "vmh-tstack",
+  "owner": {
+    "name": "vladimir-fsh"
+  },
+  "metadata": {
+    "description": "PR workflows and code reviews from tstack."
+  },
+  "plugins": [
+    {
+      "name": "tstack",
+      "source": "./",
+      "description": "PR workflows and code reviews.",
+      "category": "productivity"
+    }
+  ]
+}

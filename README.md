@@ -1,7 +1,7 @@
 # tstack
 
 A personal adaptation of [t3dotgg/tstack](https://github.com/t3dotgg/tstack)
-packaged as a versioned Codex plugin. Sol reviews use native subagents; council
+packaged as a versioned plugin for Codex and Claude Code. Sol reviews use native subagents; council
 runs latest Sol, latest Opus through Claude Code CLI, and Gemini Pro through
 Cursor CLI in parallel.
 
@@ -30,6 +30,8 @@ Some skills call others:
 
 ## Install
 
+### Codex
+
 Once the plugin files are published to this repository:
 
 ```bash
@@ -51,7 +53,26 @@ codex plugin add tstack@vmh-tstack
 
 Both sources use the same marketplace name. Choose one source at a time.
 
+### Claude Code
+
+```bash
+claude plugin marketplace add vladimir-fsh/tstack
+claude plugin install tstack@vmh-tstack
+```
+
+For local development, pass the checkout path to `marketplace add` instead. In a
+Claude Code chat the same steps are `/plugin marketplace add vladimir-fsh/tstack`
+and `/plugin install tstack@vmh-tstack`. Plugin skills are namespaced, for example
+`/tstack:full-send`; trigger phrases such as "full send" work as before. Run
+`/reload-plugins` or start a new session after installing.
+
+The skills are written for Codex first. In Claude Code, `sol-loop` and the Sol
+seat of `council` need a way to reach GPT Sol (for example the Codex CLI or the
+Codex plugin); the other workflows only need `gh`.
+
 ## Update
+
+### Codex
 
 For a GitHub-backed installation, refresh the marketplace and install the current
 plugin version:
@@ -65,23 +86,36 @@ For a local source, run `codex plugin add tstack@vmh-tstack` again after editing
 the checkout. Local plugins are installed as cached copies; editing this checkout
 does not edit an existing installation. Start a new chat after updating.
 
+### Claude Code
+
+```bash
+claude plugin marketplace update vmh-tstack
+claude plugin update tstack@vmh-tstack
+```
+
+Claude Code also caches installed plugins and picks up a new version only after
+the `version` field changes. Restart Claude Code after updating.
+
 ## Release
 
-The version in `.codex-plugin/plugin.json` is the single source of truth. Bump it
-from any working directory with the script's absolute path, or from this repo:
+The version lives in `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json`
+and must match. The bump script updates both and refuses to run if they differ.
+Bump it from any working directory with the script's absolute path, or from this
+repo:
 
 ```bash
 /usr/bin/python3 scripts/bump_version.py patch
 ```
 
 Use `patch` for fixes, `minor` for added workflows, and `major` for breaking
-changes. The script changes only the manifest version. Review and commit the
+changes. The script changes only the manifest versions. Review and commit the
 skill changes together with the version bump, then push them to the branch
 tracked by the marketplace. A bump alone does not publish an update. Git tags
 such as `v0.1.1` are optional release markers.
 
-The marketplace at `.agents/plugins/marketplace.json` points to this repository's
-root. The plugin reuses `skills/` directly; there is no build step or generated
+The Codex marketplace at `.agents/plugins/marketplace.json` and the Claude Code
+marketplace at `.claude-plugin/marketplace.json` both point to this repository's
+root. Both plugins reuse `skills/` directly; there is no build step or generated
 copy of the skills to keep in sync.
 
 ## Requirements

@@ -1,0 +1,11 @@
+{
+  "name": "tstack",
+  "version": "0.1.1",
+  "description": "PR workflows and code reviews for Claude Code.",
+  "author": {
+    "name": "vladimir-fsh"
+  },
+  "repository": "https://github.com/vladimir-fsh/tstack",
+  "license": "MIT",
+  "skills": "./skills/"
+}
