@@ -1,6 +1,6 @@
 {
   "name": "tstack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PR workflows and code reviews for Codex.",
   "author": {
     "name": "vladimir-fsh"
