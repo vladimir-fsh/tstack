@@ -1,9 +1,17 @@
 ---
 name: council
-description: Get three parallel reviews using the latest Sol in Codex, Claude Code CLI, and Cursor CLI. Use when the user asks for "council".
+description: Get three parallel reviews using the latest Sol in Codex, Claude Code CLI, and a user-selected Gemini, Grok, or Muse model through Cursor CLI. Use when the user asks for "council".
 ---
 
 # Council
+
+Before launching any reviewer, ask the user to choose the third council member:
+Gemini, Grok, or Muse, all accessed through Cursor CLI. If the user already
+selected a member for this council run, use that choice without asking again.
+Use the available question tool to present the three choices and wait for an
+explicit answer; a preselected option or no response is not a choice. If no
+question tool is available, ask in chat and wait. Keep the selection for later
+rounds of the same council run unless the user changes it.
 
 Before an audit, address outstanding PR comments, fix known issues, and run
 relevant checks. Give council the updated implementation; do not defer known
@@ -12,13 +20,15 @@ and explore new ideas, skip fixes to code being replaced.
 
 Bring in three delegates to help with the user's request, usually for review
 or feedback. Use one strong model from each of three different providers, at
-high reasoning effort. If the user's instructions name council members, use
-those. Otherwise pick the latest flagship model from each provider, for
-example Claude Opus, GPT Sol, and Gemini Pro.
+high reasoning effort where supported. If the user's instructions name council
+members, use those. For a chosen model family, use its latest available flagship
+model from the current model list.
 
 In this Codex environment, use one latest-Sol native agent, one latest-Opus
-reviewer through Claude Code CLI, and one Cursor CLI reviewer. For Cursor, select the latest available
-Gemini Pro from its current model list unless the user names another model.
+reviewer through Claude Code CLI, and the user-selected Cursor CLI reviewer.
+Resolve the selected family to an exact available model ID before launching
+any reviewer. If unavailable, report that and ask the user to choose again;
+keep the council pending until the choice can be honored.
 Cursor is the access route; the selected model determines the third provider.
 Use model selection and native agent lifecycle from
 [sol-loop](../sol-loop/SKILL.md), section 2, and the recipes for
@@ -56,7 +66,7 @@ Rounds: 2
 | --- | --- | --- |
 | Claude CLI (<verified model>) | 7/10 | 9/10 |
 | Latest Sol (<verified model>) | 8/10 | 10/10 |
-| Cursor CLI (<verified Gemini model>) | 7/10 | 9/10 |
+| Cursor CLI (<verified selected model>) | 7/10 | 9/10 |
 ```
 
 If a delegate gives no score, write `no score`. Do not invent one.

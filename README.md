@@ -2,8 +2,9 @@
 
 A personal adaptation of [t3dotgg/tstack](https://github.com/t3dotgg/tstack)
 packaged as a versioned plugin for Codex and Claude Code. Sol reviews use native subagents; council
-runs latest Sol, latest Opus through Claude Code CLI, and Gemini Pro through
-Cursor CLI in parallel.
+runs latest Sol, latest Opus through Claude Code CLI, and your choice of Gemini,
+Grok, or Muse through Cursor CLI in parallel. It asks for that choice before
+launching reviewers and keeps it for subsequent rounds.
 
 ## Skills
 
@@ -11,7 +12,7 @@ Cursor CLI in parallel.
 |---|---|---|
 | `full-send` | "full send" | Takes a change to a merged PR with nobody watching: proves it, reviews it, files it, babysits it, merges it. |
 | `full-stop` | "full stop" | Same as `full-send`, but stops when the PR is ready for you to merge. |
-| `council` | "council" | Gets three parallel reviews: native Sol, Claude CLI, and Gemini Pro through Cursor CLI. |
+| `council` | "council" | Gets three parallel reviews: native Sol, Claude CLI, and your choice of Gemini, Grok, or Muse through Cursor CLI. |
 | `sol-loop` | "sol loop" | Reviews a change with the latest available GPT Sol until agreement or the review budget is reached. |
 | `file-pr` | "file a PR" | Files a short PR that leads with the problem, not an inventory of changes. |
 | `takeover` | "take over" | Finishes someone else's PR, branch, or agent thread, and keeps their credit. |
@@ -125,7 +126,8 @@ copy of the skills to keep in sync.
   latest available Sol from the current runtime; no version is pinned.
 - `/usr/bin/python3` for `babysit-pr`'s bundled `pr-wait` script on this Mac.
 - For `council` only: Claude Code CLI with a working login (`claude auth login`),
-  plus Cursor CLI (`agent login`) with Gemini Pro available in `agent models`.
+  plus Cursor CLI (`agent login`) with the selected Gemini, Grok, or Muse model
+  available in `agent models`. An unavailable choice is reported, not substituted.
   Model versions are selected at runtime. Other workflows, including `sol-loop`
   and `full-send`, do not require either external CLI.
 

@@ -1,6 +1,6 @@
 {
   "name": "tstack",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "PR workflows and code reviews for Claude Code.",
   "author": {
     "name": "vladimir-fsh"

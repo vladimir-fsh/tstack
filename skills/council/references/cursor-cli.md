@@ -4,9 +4,11 @@ Check `agent --version`, `agent status`, and `agent models`. If authentication
 is missing, ask the user to run `agent login` in their terminal. Report the
 council as incomplete until the configured reviewer is available.
 
-Select the latest available Gemini Pro from the current model list, unless the
-user names another model. Set `cursor_model` to the exact listed ID; do not pin
-a version in this skill or use Auto, which may duplicate another council model.
+Use the user's choice recorded in [Council](../SKILL.md). If no choice has
+been recorded for this run, complete Council's selection step first. Resolve
+the chosen family to its latest available flagship model, or use the exact
+model requested by the user. Set `cursor_model` to the exact listed ID; do not
+pin a version in this skill or use Auto, which may duplicate another council model.
 If the requested model is absent, report it rather than substituting. Use a
 high reasoning variant only when the current CLI/model listing supports it.
 
