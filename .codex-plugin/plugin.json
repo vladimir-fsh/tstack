@@ -1,0 +1,18 @@
+{
+  "name": "tstack",
+  "version": "0.1.0",
+  "description": "PR workflows and code reviews for Codex.",
+  "author": {
+    "name": "vladimir-fsh"
+  },
+  "repository": "https://github.com/vladimir-fsh/tstack",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "tstack",
+    "shortDescription": "PR workflows and code reviews",
+    "longDescription": "Create, review, monitor, and maintain pull requests with reusable Codex skills.",
+    "developerName": "vladimir-fsh",
+    "category": "Productivity"
+  }
+}

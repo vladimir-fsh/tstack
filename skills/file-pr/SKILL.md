@@ -27,6 +27,16 @@ GOOD
 
 > ✅ perf(server): cut websocket frame size by 70%+ with gzipping
 
+Write for an intelligent reviewer who has not seen the conversation, tool
+output, or files you inspected. Make the title and description understandable
+without that context. Put the problem and resulting behavior first; introduce
+concepts before referring to them.
+
+Use plain words, short complete sentences, and active voice. Use the same term
+for the same thing; explain unfamiliar abbreviations and avoid invented terms.
+Connect related ideas in paragraphs, and use bullets for separate items. Include
+the context needed to assess the change and leave out unnecessary detail.
+
 Open the description with a simple explanation of the problem based on the
 user's original prompt, then briefly explain the solution. Do not lead with an
 implementation inventory:
@@ -39,10 +49,7 @@ GOOD
 
 > ✅ My "new worktree" default was ignored when starting new threads on existing worktrees. Super unintuitive. Now your preferences always apply.
 
-When repository guidance permits attribution, end the description with the
-public model name and harness that made the changes, for example `Created with <model> in <harness>.` Include subagent
-models that wrote part of the change; a read-only reviewer is not an author. Use the model name the harness reports.
-If model identity is unavailable, name the harness without guessing a model.
+Do not add AI authorship signatures or credits to PR titles or descriptions.
 
 Before submission, check the title, description, quotes, and attachments for
 secrets and private details.

@@ -1,9 +1,9 @@
 # tstack
 
 A personal adaptation of [t3dotgg/tstack](https://github.com/t3dotgg/tstack)
-for Codex. Sol reviews use native subagents; council runs latest Sol,
-latest Opus through Claude Code CLI, and Gemini Pro through Cursor CLI
-in parallel.
+packaged as a versioned Codex plugin. Sol reviews use native subagents; council
+runs latest Sol, latest Opus through Claude Code CLI, and Gemini Pro through
+Cursor CLI in parallel.
 
 ## Skills
 
@@ -19,7 +19,8 @@ in parallel.
 | `modernize` | "modernize" | Rebases an old PR and decides if it should still exist. |
 | `leaving-pr-comments` | (automatic) | Formats comments that an agent posts on your behalf. |
 
-Some skills call others. Install the ones they need too:
+The plugin includes all nine skills and their bundled scripts and references.
+Some skills call others:
 
 - `full-send` uses `sol-loop`, `file-pr`, and `babysit-pr`.
 - `full-stop` uses `full-send`.
@@ -29,11 +30,59 @@ Some skills call others. Install the ones they need too:
 
 ## Install
 
+Once the plugin files are published to this repository:
+
 ```bash
-git clone https://github.com/vladimir-fsh/tstack
-mkdir -p ~/.codex/skills
-cp -R tstack/skills/* ~/.codex/skills/
+codex plugin marketplace add vladimir-fsh/tstack
+codex plugin add tstack@vmh-tstack
 ```
+
+Start a new chat to use the installed skills. If you previously copied these
+skills to `~/.codex/skills/`, move those nine copies out of the skills directory
+after verifying the plugin installation, so Codex does not discover both copies.
+Keep unrelated personal skills.
+
+For local development, register this checkout instead of the GitHub source:
+
+```bash
+codex plugin marketplace add /absolute/path/to/tstack
+codex plugin add tstack@vmh-tstack
+```
+
+Both sources use the same marketplace name. Choose one source at a time.
+
+## Update
+
+For a GitHub-backed installation, refresh the marketplace and install the current
+plugin version:
+
+```bash
+codex plugin marketplace upgrade vmh-tstack
+codex plugin add tstack@vmh-tstack
+```
+
+For a local source, run `codex plugin add tstack@vmh-tstack` again after editing
+the checkout. Local plugins are installed as cached copies; editing this checkout
+does not edit an existing installation. Start a new chat after updating.
+
+## Release
+
+The version in `.codex-plugin/plugin.json` is the single source of truth. Bump it
+from any working directory with the script's absolute path, or from this repo:
+
+```bash
+/usr/bin/python3 scripts/bump_version.py patch
+```
+
+Use `patch` for fixes, `minor` for added workflows, and `major` for breaking
+changes. The script changes only the manifest version. Review and commit the
+skill changes together with the version bump, then push them to the branch
+tracked by the marketplace. A bump alone does not publish an update. Git tags
+such as `v0.1.1` are optional release markers.
+
+The marketplace at `.agents/plugins/marketplace.json` points to this repository's
+root. The plugin reuses `skills/` directly; there is no build step or generated
+copy of the skills to keep in sync.
 
 ## Requirements
 
@@ -52,7 +101,7 @@ that task ends. Repository PR skills, templates, and permission rules apply.
 ## Make them yours
 
 Edit the skill instructions in this repository, inspect the Git diff, then
-copy the updated skill directories to `~/.codex/skills/` to use them globally.
+release and update the plugin as described above.
 Keep project-specific instructions in that project's `AGENTS.md` rather than
 baking them into the shared workflow.
 
