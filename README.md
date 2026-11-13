@@ -16,7 +16,7 @@ launching reviewers and keeps it for subsequent rounds.
 | `sol-loop` | "sol loop" | Reviews a change with the latest available GPT Sol until agreement or the review budget is reached. |
 | `file-pr` | "file a PR" | Files a short PR that leads with the problem, not an inventory of changes. |
 | `takeover` | "take over" | Finishes someone else's PR, branch, or agent thread, and keeps their credit. |
-| `babysit-pr` | "babysit" | Watches a PR through CI and review bots, and fixes the real findings. |
+| `babysit-pr` | "babysit" | Calls Claude, fixes the first review, cleans up its comments, and requests re-review; asks before each further fix round. |
 | `modernize` | "modernize" | Rebases an old PR and decides if it should still exist. |
 | `leaving-pr-comments` | (automatic) | Formats comments that an agent posts on your behalf. |
 
@@ -28,6 +28,12 @@ Some skills call others:
 - `council` uses `sol-loop` for Codex model selection and agent lifecycle.
 - `takeover` uses `modernize`, `file-pr`, `babysit-pr`, and `leaving-pr-comments`.
 - `file-pr`, `babysit-pr`, and `modernize` use `leaving-pr-comments`.
+
+`babysit-pr` performs one automatic Claude fix/cleanup/re-review cycle. It then
+shows the new findings and asks whether to repeat; each yes permits one more
+cycle. A no leaves the latest comments visible and the PR open. A clean result
+ends the loop. This decision gate also applies inside `full-send` and `full-stop`.
+An explicitly read-only monitoring request only observes the PR.
 
 ## Install
 
@@ -122,6 +128,9 @@ copy of the skills to keep in sync.
 ## Requirements
 
 - An authenticated [GitHub CLI](https://cli.github.com) (`gh`).
+- For actionable `babysit-pr`: a configured Claude PR-comment integration and
+  permission to push fixes and delete that round's request and feedback comments.
+  Unsupported cleanup (such as a submitted review object) is reported as a blocker.
 - Codex with native subagent tools and access to a Sol model. Always select the
   latest available Sol from the current runtime; no version is pinned.
 - `/usr/bin/python3` for `babysit-pr`'s bundled `pr-wait` script on this Mac.

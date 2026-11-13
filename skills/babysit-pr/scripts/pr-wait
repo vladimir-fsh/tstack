@@ -34,8 +34,11 @@ Events
   - the PR merged or closed
 
 CodeRabbit is advisory: pr-wait reports it but never waits for it. Comment
-edits are never events, and top-level comments from CI and deploy bots
+edits are normally not events, and top-level comments from CI and deploy bots
 (github-actions, Vercel) are skipped, because checks already carry that news.
+Use --review-author LOGIN (repeatable) to report new or edited comments and
+reviews from that exact account, including bots otherwise filtered out.
+These events indicate activity, not review completion.
 
 State lives in ~/.local/state/pr-wait/. A lock makes a second watcher for the
 same PR exit at once. A state file lets a restarted watcher report what arrived
@@ -246,8 +249,9 @@ def required_checks(repo: str, base: str) -> set[str]:
 
 
 class Watcher:
-    def __init__(self, repo: str, pr: int, until: str, interval: int) -> None:
+    def __init__(self, repo: str, pr: int, until: str, interval: int, review_authors: Sequence[str] = ()) -> None:
         self.repo, self.pr, self.until, self.interval = repo, pr, until, interval
+        self.review_authors = {login.casefold().removesuffix("[bot]") for login in review_authors}
         self.owner, self.name = repo.split("/")
         self.path = STATE_DIR / f"{repo.replace('/', '__')}__{pr}.json"
         state = self.load()
@@ -294,6 +298,20 @@ class Watcher:
             self.say(line)
         self.save()
         sys.exit(code)
+
+    def review_activity(self, node: Json) -> bool:
+        """Track selected reviewers even when they edit a progress comment."""
+        login, _ = who(node)
+        if login.casefold().removesuffix("[bot]") not in self.review_authors:
+            return False
+        # Preserve status markers in HTML and review-state changes with no body edit.
+        content = json.dumps([node.get("body", ""), node.get("state"), node.get("commit")], sort_keys=True)
+        version = hashlib.sha1(content.encode()).hexdigest()[:12]
+        self.emit(
+            f"review-activity:{node['id']}:{version}",
+            f"review activity from {login}: {snippet(node.get('body', ''))} {node['url']}",
+        )
+        return True
 
     def fetch_pr(self) -> Json:
         proc = gh([
@@ -386,13 +404,17 @@ class Watcher:
         self.prev_snapshot = snapshot
         green = gate_done and stable and not fail_lines
 
-        # People and bots talking. Edits are never events.
+        # Selected reviewers can update an existing progress comment in place.
         for comment in comments:
+            if self.review_activity(comment):
+                continue
             login, is_bot = who(comment)
             if login in mine or bot_name(login) or (is_bot and any(b in login for b in STATUS_BOTS)):
                 continue
             self.emit(f"c:{comment['id']}", f"comment from {login}: {snippet(comment['body'])} {comment['url']}")
         for review in reviews:
+            if self.review_activity(review):
+                continue
             login, is_bot = who(review)
             if login in mine or is_bot:
                 continue
@@ -406,6 +428,8 @@ class Watcher:
                 unresolved.append(nodes[0]["url"])
             where = f"{thread['path']}:{thread['line']}" if thread["line"] else thread["path"]
             for index, comment in enumerate(nodes):
+                if self.review_activity(comment):
+                    continue
                 login, _ = who(comment)
                 if login in mine:
                     continue
@@ -543,10 +567,11 @@ def main() -> None:
     parser.add_argument("--repo", help="owner/name (default: from the URL or the current checkout)")
     parser.add_argument("--until", choices=("green", "ready", "any-change"), default="ready")
     parser.add_argument("--interval", type=int, default=20, help="seconds between polls (default 20, min 5)")
+    parser.add_argument("--review-author", action="append", default=[], metavar="LOGIN", help="report new and edited feedback from this exact account (repeatable)")
     args = parser.parse_args()
     repo, pr = parse_target(args.pr, args.repo)
     _lock = lock(repo, pr)
-    Watcher(repo, pr, args.until, max(args.interval, 5)).run()
+    Watcher(repo, pr, args.until, max(args.interval, 5), args.review_author).run()
 
 
 if __name__ == "__main__":

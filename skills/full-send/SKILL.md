@@ -48,7 +48,10 @@ one appears.
    Rebase onto the latest actual target branch first. Mention proof in the
    description when it helps review, rather than listing routine green checks.
 5. **Babysit the PR** with the `babysit-pr` skill. Fix real findings and CI
-   failures. Get proof for each fix before you push it.
+   failures. Get proof for each fix before you push it. Its Claude cycle permits
+   the first fix and re-review automatically, then requires the user's yes for
+   each further fix round. That specific decision gate overrides this workflow's
+   general autonomy; a no leaves the PR open and ends the workflow.
 6. **Merge** when the merge gate passes.
 7. **Report** in your final message: the PR link, the merge commit, your proof,
    and each decision you made for the user.

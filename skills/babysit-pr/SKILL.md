@@ -1,12 +1,19 @@
 ---
 name: babysit-pr
-description: Monitor a pull request through review and CI. Use when the user asks to monitor, watch, or babysit a PR.
+description: Babysit a PR with a Claude review, one automatic fix and re-review, then user-approved repeat rounds. Also supports read-only PR monitoring.
 ---
 
 # Babysit PR
 
-Many repos have AI review bots. They're helpful, even if they are not always
-right.
+For an actionable babysit request, follow the [Claude cycle](references/claude-cycle.md):
+request review, wait, fix valid findings, clean up that round's comments, request
+review again, then ask before fixing the new findings. Each yes permits one more
+fix, cleanup, and review round. This is also the default when another skill calls
+`babysit-pr`; a caller's general autonomy does not skip the repeat-round question.
+
+An explicitly read-only watch request only observes checks and feedback; it does
+not invoke Claude, change code, or delete comments. If the user explicitly chooses
+another reviewer or CI-only monitoring, follow that scope using the guidance below.
 
 ## Waiting
 
@@ -22,7 +29,7 @@ Wait with `scripts/pr-wait` from this skill's directory (use its absolute
 path).
 
 ```bash
-pr-wait <pr> [--repo owner/name] [--until ready|green|any-change]
+pr-wait <pr> [--repo owner/name] [--until ready|green|any-change] [--review-author LOGIN]
 ```
 
 It prints one line per real event. It exits 0 when the `--until` condition is
@@ -35,6 +42,12 @@ unresolved threads, PR closed), and 2 on bad input.
   Use it when the repo has no Greptile or Macroscope; assess reviews separately.
 - `any-change`: exit on the first event.
 
+For Claude, use `any-change` with `--review-author` for the exact account(s)
+confirmed by the repository's integration. This includes edits to progress
+comments and bot reviews that ordinary watching skips. Repeat the flag for
+multiple accounts. An activity event is not proof that Claude finished; use the
+completion rules in the Claude cycle. `ready` does not wait for Claude.
+
 When no checks exist or are expected, assess readiness directly; neither
 `green` nor `ready` completes on an empty check set. Exit 0 alone does not prove
 the full merge gate; read the event to distinguish ready from already merged.
@@ -43,8 +56,10 @@ In Codex, run the bundled script with `/usr/bin/python3` and its absolute path.
 Keep the process/session ID and collect output in waits of at most 60 seconds.
 Stay active while waiting; ending a Codex turn does not arrange a future wakeup.
 The parent can do independent work while CI runs. Stop the owned watcher before
-a final handoff or a question that ends active work. Continue until ready or a
-real blocker, unless the user specifies a time limit.
+a final handoff or a question that ends active work. Continue until the current
+review completes, readiness is reached, or a real blocker appears, unless the
+user specifies a time limit. The Claude cycle's decision point takes precedence
+over continuing to readiness.
 
 In Claude Code, run it with the Monitor tool (`timeout_ms: 3600000`), so each
 line wakes you. Without a monitor, run it as one long command. It ends on its
