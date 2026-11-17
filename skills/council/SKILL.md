@@ -53,26 +53,9 @@ APPROVE or CHANGES verdict with file/line evidence and stable finding IDs.
 Count each full review pass as one round.
 A fresh review after fixes starts a new round.
 
-If the work ends in a pull request, put the results in the PR description.
-Preserve the repository template; put this section before the model and
-harness line at the end when the template permits. For the Codex council:
-
-```markdown
-## Council review
-
-Rounds: 2
-
-| Delegate | Round 1 | Round 2 |
-| --- | --- | --- |
-| Claude CLI (<verified model>) | 7/10 | 9/10 |
-| Latest Sol (<verified model>) | 8/10 | 10/10 |
-| Cursor CLI (<verified selected model>) | 7/10 | 9/10 |
-```
-
+Report council findings, scores, and round history in the final chat reply.
+Include them in a PR description or comment only when the user explicitly asks.
 If a delegate gives no score, write `no score`. Do not invent one.
-If the PR is open and its description update is authorized, edit it rather
-than posting a comment.
-If there is no PR, put the same results in the final reply only.
 
 If you agree with their recommendations, make the smallest justified changes,
 rerun focused checks, and request a fresh review after. Continue until all
