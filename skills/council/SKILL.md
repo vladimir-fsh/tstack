@@ -1,6 +1,6 @@
 ---
 name: council
-description: Get three parallel reviews using the latest Sol in Codex, Claude Code CLI, and a user-selected Gemini, Grok, or Muse model through Cursor CLI. Use when the user asks for "council".
+description: Get three parallel reviews from the latest Sol, the latest Opus, and a user-selected Gemini, Grok, or Muse model through Cursor CLI, from Codex or Claude Code. Use when the user asks for "council".
 ---
 
 # Council
@@ -24,19 +24,28 @@ high reasoning effort where supported. If the user's instructions name council
 members, use those. For a chosen model family, use its latest available flagship
 model from the current model list.
 
-In this Codex environment, use one latest-Sol native agent, one latest-Opus
-reviewer through Claude Code CLI, and the user-selected Cursor CLI reviewer.
+Route each seat by the host running the council. The host's own provider runs
+as a native subagent; the other two run as CLI processes:
+
+| Host | Sol seat | Opus seat | Third seat |
+| --- | --- | --- | --- |
+| Codex | native agent, per [sol-loop](../sol-loop/SKILL.md) section 2 | [Claude CLI](references/claude-cli.md) | [Cursor CLI](references/cursor-cli.md) |
+| Claude Code | [Codex CLI](references/codex-cli.md) | native `Agent` subagent | [Cursor CLI](references/cursor-cli.md) |
+
+In Claude Code, start the Opus seat with the `Agent` tool:
+`subagent_type: "general-purpose"`, `model: "opus"`, `run_in_background: true`,
+and a self-contained brief that opens with the read-only rule (no edits,
+commits, pushes, PR comments, or subagents). Save its agent ID and start later
+rounds as fresh agents with the ledger, so each round reviews independently.
+
 Resolve the selected family to an exact available model ID before launching
 any reviewer. If unavailable, report that and ask the user to choose again;
 keep the council pending until the choice can be honored.
 Cursor is the access route; the selected model determines the third provider.
-Use model selection and native agent lifecycle from
-[sol-loop](../sol-loop/SKILL.md), section 2, and the recipes for
-[Claude CLI](references/claude-cli.md) and [Cursor CLI](references/cursor-cli.md).
 Record actual model IDs when exposed. An unavailable member remains a blocker;
-do not silently replace Cursor with another Sol agent.
+do not silently replace Cursor or Codex with another agent from the host.
 
-Start the native Sol agent and both CLI processes before waiting for any result,
+Start the native agent and both CLI processes before waiting for any result,
 within runtime concurrency limits. Save the agent ID and both process handles;
 start later rounds in parallel too. Report an unavailable configured route
 instead of silently replacing a reviewer.
