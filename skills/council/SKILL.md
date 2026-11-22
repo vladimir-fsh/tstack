@@ -42,6 +42,10 @@ Resolve the selected family to an exact available model ID before launching
 any reviewer. If unavailable, report that and ask the user to choose again;
 keep the council pending until the choice can be honored.
 Cursor is the access route; the selected model determines the third provider.
+Use model selection and native agent lifecycle from
+[sol-loop](../sol-loop/SKILL.md), section 2, and the recipes for
+[Claude CLI](references/claude-cli.md), [Codex CLI](references/codex-cli.md),
+and [Cursor CLI](references/cursor-cli.md).
 Record actual model IDs when exposed. An unavailable member remains a blocker;
 do not silently replace Cursor or Codex with another agent from the host.
 
