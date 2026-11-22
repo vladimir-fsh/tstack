@@ -29,8 +29,8 @@ as a native subagent; the other two run as CLI processes:
 
 | Host | Sol seat | Opus seat | Third seat |
 | --- | --- | --- | --- |
-| Codex | native agent, per [sol-loop](../sol-loop/SKILL.md) section 2 | [Claude CLI](references/claude-cli.md) | [Cursor CLI](references/cursor-cli.md) |
-| Claude Code | [Codex CLI](references/codex-cli.md) | native `Agent` subagent | [Cursor CLI](references/cursor-cli.md) |
+| Codex | native agent | Claude CLI | Cursor CLI |
+| Claude Code | Codex CLI | native `Agent` subagent | Cursor CLI |
 
 In Claude Code, start the Opus seat with the `Agent` tool:
 `subagent_type: "general-purpose"`, `model: "opus"`, `run_in_background: true`,
